@@ -14,7 +14,7 @@ n = float(form.getvalue('n_lados'))
 perimetro = n * l
 p = perimetro / 2
 
-angulo_central = 2 * math.pi / 2
+angulo_central = 2 * math.pi / n
 theta = angulo_central / 2
 
 apotema = l / (2 * math.tan(theta))
