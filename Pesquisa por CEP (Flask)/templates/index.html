@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Index</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  </head>
+  <body>
+
+    <!-- As a heading -->
+    <nav class="navbar bg-light">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Pesquisa por CEP</span>
+      </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+      <div class="row g-3">
+        <div class="col-auto">
+          <label for="inputCep" class="col-sm-2 col-form-label">CEP</label>
+        </div>
+        <div class="col-auto">
+          <input type="text" class="form-control" id="inputCep" name="cep" placeholder="00000000">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary mb-3" id="btnSubmit">Submeter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">CEP</th>
+            <th scope="col">LOGRADOURO</th>
+            <th scope="col">COMPLEMENTO</th>
+            <th scope="col">BAIRRO</th>
+            <th scope="col">LOCALIDADE</th>
+            <th scope="col">UF</th>
+            <th scope="col">DDD</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+  </body>
+  <script>
+    document.getElementById('btnSubmit').addEventListener('click', async function (event) {
+        const tablebody = document.getElementById('tableBody');
+        let data = new FormData();
+
+      data.append("cep", document.getElementById('inputCep').value);
+
+        try {
+          const r = await fetch('http://localhost:5000/cep', {
+                method: 'POST',
+                body: data
+            });
+
+            if (r.ok) {
+                const body = await r.json();
+                console.log(body);
+                
+                html = "<td>" + body['cep'] + "</td>"
+                html += "<td>" + body['logradouro'] + "</td>"
+                html += "<td>" + body['complemento'] + "</td>"
+                html += "<td>" + body['bairro'] + "</td>"
+                html += "<td>" + body['localidade'] + "</td>"
+                html += "<td>" + body['uf'] + "</td>"
+                html += "<td>" + body['ddd'] + "</td>"
+
+                const newElement = document.createElement('tr');
+                newElement.innerHTML = html;
+                tablebody.insertBefore(newElement, tablebody.firstChild);
+                document.getElementById('inputCep').value = "";
+            } else {
+                console.error(r)
+            };
+        } catch (err) {
+            console.error(err)
+        }
+    })
+  </script>
+</html>
