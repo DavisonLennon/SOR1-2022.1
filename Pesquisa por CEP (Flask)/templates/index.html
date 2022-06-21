@@ -1,21 +1,23 @@
 <!doctype html>
 <html lang="pt-br">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8" /> 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Index</title>
 
+    <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
   </head>
   <body>
 
-    <!-- As a heading -->
+    <!-- CABEÇALHO DA PÁGINA -->
     <nav class="navbar bg-light">
       <div class="container-fluid">
         <span class="navbar-brand mb-0 h1">Pesquisa por CEP</span>
       </div>
     </nav>
 
+    <!-- FORMULÁRIO -->
     <div class="container-fluid mt-3">
       <div class="row g-3">
         <div class="col-auto">
@@ -30,6 +32,7 @@
       </div>
     </div>
 
+    <!-- TABELA DE RESPOSTAS -->
     <div class="container-fluid">
       <table class="table table-striped">
         <thead>
@@ -43,48 +46,64 @@
             <th scope="col">DDD</th>
           </tr>
         </thead>
+        <!-- CORPO DA TABELA SERÁ ALIMENTADO DINAMICAMENTE VIA JAVASCRIPT -->
         <tbody id="tableBody">
         </tbody>
       </table>
     </div>
 
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <!-- BOOTSTRAP -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
   </body>
-  <script>
-    document.getElementById('btnSubmit').addEventListener('click', async function (event) {
-        const tablebody = document.getElementById('tableBody');
-        let data = new FormData();
 
+  <!-- JAVASCRIPT -->
+  <script>
+    // Estabelece o comportamento do evento 'click' do botão 'btnSubmit'
+    document.getElementById('btnSubmit').addEventListener('click', async function (event) {
+      // Referencia o corpo da tabela
+      const tablebody = document.getElementById('tableBody');
+      // Cria um novo objeto de formulário para envio
+      let data = new FormData();
+
+      // Extrai cep da caixa de texto e adiciona ele ao objeto de formulário
       data.append("cep", document.getElementById('inputCep').value);
 
-        try {
-          const r = await fetch('http://localhost:5000/cep', {
-                method: 'POST',
-                body: data
-            });
+      // Testa requisição para o backend Flask
+      try {
+        // Efetua a requisição via método POST enviando os dados do formulário para o backend e recebendo a resposta deste
+        const r = await fetch('http://localhost:5000/cep', {
+          method: 'POST',
+          body: data
+        });
 
-            if (r.ok) {
-                const body = await r.json();
-                console.log(body);
-                
-                html = "<td>" + body['cep'] + "</td>"
-                html += "<td>" + body['logradouro'] + "</td>"
-                html += "<td>" + body['complemento'] + "</td>"
-                html += "<td>" + body['bairro'] + "</td>"
-                html += "<td>" + body['localidade'] + "</td>"
-                html += "<td>" + body['uf'] + "</td>"
-                html += "<td>" + body['ddd'] + "</td>"
+        if (r.ok) { // Se a resposta foi bem sucedida (código 2XX)
+          // Restaura conteúdo da resposta no formato JSON
+          const content = await r.json();
+          console.log(content); // Para debug
 
-                const newElement = document.createElement('tr');
-                newElement.innerHTML = html;
-                tablebody.insertBefore(newElement, tablebody.firstChild);
-                document.getElementById('inputCep').value = "";
-            } else {
-                console.error(r)
-            };
-        } catch (err) {
-            console.error(err)
-        }
+          // Modela células da tabela HTML
+          html  = "<td>" + content['cep'] + "</td>"
+          html += "<td>" + content['logradouro'] + "</td>"
+          html += "<td>" + content['complemento'] + "</td>"
+          html += "<td>" + content['bairro'] + "</td>"
+          html += "<td>" + content['localidade'] + "</td>"
+          html += "<td>" + content['uf'] + "</td>"
+          html += "<td>" + content['ddd'] + "</td>"
+
+          // Cria um elemento dinâmico para linha da tabela HTML
+          const newLine = document.createElement('tr');
+          // Insere as células como conteúdo da linha da tabela
+          newLine.innerHTML = html;
+          // Insere linha no topo da tabela
+          tablebody.insertBefore(newLine, tablebody.firstChild);
+          // Limpa o campo 'inputCep' do formulário
+          document.getElementById('inputCep').value = "";
+        } else { // Se a resposta não foi bem-sucedida
+          console.error(r); // Exibe mensagens de erro no console
+        };
+      } catch (err) { // Se a tentativa fracassar
+        console.error(err); // Exibe mensagens de erro no console
+      }
     })
   </script>
 </html>
